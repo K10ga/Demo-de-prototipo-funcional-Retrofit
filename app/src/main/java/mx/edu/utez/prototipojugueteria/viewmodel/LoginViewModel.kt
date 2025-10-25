@@ -2,17 +2,19 @@ package mx.edu.utez.prototipojugueteria.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-
+import androidx.navigation.NavController
 
 class LoginViewModel : ViewModel() {
     var password = mutableStateOf("")
     var username = mutableStateOf("")
     var loginError = mutableStateOf("")
 
-    fun login(onSuccess: () -> Unit) {
+    fun login(navController: NavController) {
         if (username.value == "admin" && password.value == "123") {
             loginError.value = ""
-            onSuccess()
+            navController.navigate("juguete") {
+                popUpTo("login") { inclusive = true }
+            }
         } else {
             loginError.value = "Usuario o contraseña incorrectos"
         }
