@@ -64,7 +64,7 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
         }
 
         Link("¿No tienes cuenta? Regístrate") {
-            navController.navigate("register")
+            navController.navigate("registro")
         }
 
     }
