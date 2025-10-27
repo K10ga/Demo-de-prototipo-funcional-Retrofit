@@ -8,6 +8,8 @@ import androidx.navigation.compose.composable
 import mx.edu.utez.prototipojugueteria.viewmodel.JugueteViewModel
 import mx.edu.utez.prototipojugueteria.viewmodel.LoginViewModel
 import androidx.navigation.compose.NavHost
+import mx.edu.utez.prototipojugueteria.ui.screens.ForgotPasswordScreen
+
 @Composable
 fun Navigation() {
     val navController = rememberNavController()
@@ -20,10 +22,9 @@ fun Navigation() {
         composable("login") {
             LoginScreen(loginViewModel, navController)
         }
+        composable("forgot_password") { ForgotPasswordScreen(navController) }
 
-            //Aqui va el juguete screen
 
-        //pendiente eso depende de uzy y carlitos
 
     }
 }
