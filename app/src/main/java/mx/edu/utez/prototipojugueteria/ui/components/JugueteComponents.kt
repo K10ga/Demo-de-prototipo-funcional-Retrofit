@@ -17,9 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import mx.edu.utez.prototipojugueteria.data.model.Juguete
 
-/**
- * Análogo a PassportList: El LazyColumn que muestra las JugueteCard.
- */
+
 @Composable
 fun JugueteList(lista: List<Juguete>, onJugueteClick: (Juguete) -> Unit) {
     LazyColumn(
@@ -31,9 +29,7 @@ fun JugueteList(lista: List<Juguete>, onJugueteClick: (Juguete) -> Unit) {
     }
 }
 
-/**
- * Análogo a PassportCard: El Composable para un solo item de Juguete.
- */
+
 @Composable
 fun JugueteCard(juguete: Juguete, onJugueteClick: (Juguete) -> Unit) {
     Card(

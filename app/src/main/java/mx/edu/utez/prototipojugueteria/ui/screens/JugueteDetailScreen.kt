@@ -27,7 +27,7 @@ import mx.edu.utez.prototipojugueteria.viewmodel.PrincipalViewModel
 
 @Composable
 fun JugueteDetailScreen(viewModel: PrincipalViewModel, navController: NavController) {
-    // Obtenemos el juguete seleccionado del ViewModel
+
     val juguete by viewModel.selectedJuguete.collectAsStateWithLifecycle()
 
     Column(
@@ -36,12 +36,12 @@ fun JugueteDetailScreen(viewModel: PrincipalViewModel, navController: NavControl
             .padding(16.dp)
     ) {
 
-        // --- Fila de Título y Botón de Regresar (como en StampScreen) ---
+
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Botón de Regresar (Icono)
+
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar")
             }
@@ -55,12 +55,10 @@ fun JugueteDetailScreen(viewModel: PrincipalViewModel, navController: NavControl
         Spacer(modifier = Modifier.height(24.dp))
 
         if (juguete != null) {
-            // Contenido de la Card
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // --- 1. Icono del Juguete ---
                 Image(
                     painter = painterResource(id = juguete!!.imagen),
                     contentDescription = juguete!!.nombreJuguete,
@@ -69,7 +67,7 @@ fun JugueteDetailScreen(viewModel: PrincipalViewModel, navController: NavControl
                         .padding(16.dp)
                 )
 
-                // --- 2. Descripción (Atributos) ---
+
                 Text(
                     text = "Descripción del Juguete",
                     fontSize = 18.sp,
@@ -85,23 +83,23 @@ fun JugueteDetailScreen(viewModel: PrincipalViewModel, navController: NavControl
                     fontSize = 16.sp
                 )
 
-                // Este Spacer empuja los botones hacia el fondo
+
                 Spacer(modifier = Modifier.weight(1f))
 
-                // --- 3. Botones de Editar y Borrar ---
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    // Botón Editar
-                    Button(onClick = { /* No hace nada, solo representativo */ }) {
+
+                    Button(onClick = {  }) {
                         Icon(Icons.Default.Edit, contentDescription = "Editar")
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Editar")
                     }
-                    // Botón Borrar
+
                     Button(
-                        onClick = { /* No hace nada, solo representativo */ },
+                        onClick = { },
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                     ) {
                         Icon(Icons.Default.Delete, contentDescription = "Borrar")
@@ -110,7 +108,7 @@ fun JugueteDetailScreen(viewModel: PrincipalViewModel, navController: NavControl
                     }
                 }
 
-                // --- 4. Botón de Regresar (Abajo) ---
+
                 Button(
                     onClick = { navController.popBackStack() },
                     modifier = Modifier.padding(top = 16.dp)
@@ -119,7 +117,7 @@ fun JugueteDetailScreen(viewModel: PrincipalViewModel, navController: NavControl
                 }
             }
         } else {
-            // Mensaje de error si no hay juguete
+
             Text(
                 text = "Error: No se seleccionó ningún juguete.",
                 modifier = Modifier.align(Alignment.CenterHorizontally)

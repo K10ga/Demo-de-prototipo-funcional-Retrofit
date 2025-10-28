@@ -35,20 +35,16 @@ fun Navigation() {
         composable("agregarjuguete"){ AgregarJugueteScreen(navController) }
 
 
-        // --- RUTAS FALTANTES ---
 
-        // (1) La ruta "juguete" que te da el error.
-        // Esta será tu pantalla principal (la lista de juguetes)
-        composable("juguete") { // <-- AÑADIDO
+        composable("juguete") {
             PrincipalScreen(
                 viewModel = principalViewModel,
                 navController = navController
             )
         }
 
-        // (2) La ruta para la pantalla de detalle (la "card" con botones)
-        // La llamé "juguete_detail" en el código que te di antes.
-        composable("juguete_detail") { // <-- AÑADIDO
+
+        composable("juguete_detail") {
             JugueteDetailScreen(
                 viewModel = principalViewModel,
                 navController = navController

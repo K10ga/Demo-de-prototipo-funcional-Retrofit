@@ -19,18 +19,17 @@ fun PrincipalScreen(viewModel: PrincipalViewModel, navController: NavController)
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.padding(30.dp)
     ) {
-        Text("Juguetes Registrados") // Equivalente a tu Title
+        Text("Juguetes Registrados")
         val juguetes by viewModel.juguetes.collectAsStateWithLifecycle()
 
-        // El LazyColumn adaptado para juguetes
+
         JugueteList(juguetes) { juguete ->
-            // Al hacer clic:
-            // 1. Guardamos el juguete en el ViewModel
+
             viewModel.clickJuguete(juguete)
-            // 2. Navegamos a la pantalla de detalle
-            navController.navigate("juguete_detail") // Nueva ruta
+
+            navController.navigate("juguete_detail")
         }
 
-        Text("No hay más juguetes") // Equivalente a tu Label
+        Text("No hay más juguetes")
     }
 }

@@ -27,7 +27,7 @@ fun AgregarJugueteScreen(navController: NavController) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        // Cuadro de imagen
+
         Box(
             modifier = Modifier
                 .size(150.dp)
@@ -39,7 +39,7 @@ fun AgregarJugueteScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Boton para subir imagen
+
         Button(onClick = {  }) {
             Icon(
                 painter = painterResource(id = R.drawable.loginutez),
@@ -51,7 +51,7 @@ fun AgregarJugueteScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Descripción
+
         OutlinedTextField(
             value = "",
             onValueChange = {  },
@@ -63,7 +63,7 @@ fun AgregarJugueteScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Botones
+
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier.fillMaxWidth()
