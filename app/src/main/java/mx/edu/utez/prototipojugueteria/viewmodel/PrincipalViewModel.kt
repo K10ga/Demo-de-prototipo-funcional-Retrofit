@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import mx.edu.utez.prototipojugueteria.data.model.Juguete
 import mx.edu.utez.prototipojugueteria.R
-
+/*
 class PrincipalViewModel : ViewModel() {
 
     private val _juguetes = MutableStateFlow<List<Juguete>>(emptyList())
@@ -31,3 +31,4 @@ class PrincipalViewModel : ViewModel() {
         _selectedJuguete.value = juguete
     }
 }
+*/
