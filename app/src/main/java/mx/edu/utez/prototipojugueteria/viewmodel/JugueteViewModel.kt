@@ -8,11 +8,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import mx.edu.utez.prototipojugueteria.data.repository.JugueteRepository
 
-class JugueteViewModel(private val repository: JugueteRepository) : viewModel(){
+class JugueteViewModel(private val repository: JugueteRepository) : ViewModel(){
     val JugueteUiState: StateFlow<List<Juguete>> = repository.allJuguetes
     .stateIn(
         scope = viewModelScope,
-        started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000)
+        started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
 
