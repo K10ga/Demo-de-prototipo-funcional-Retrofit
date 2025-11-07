@@ -4,6 +4,6 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 
 @Database(entities = [Juguete::class], version = 1)
-abstract class VetDatabase : RoomDatabase(){
-    abstract fun JugueteDao(): JugueteDao
+abstract class VetDatabase : RoomDatabase() {
+    abstract fun jugueteDao(): JugueteDao
 }
