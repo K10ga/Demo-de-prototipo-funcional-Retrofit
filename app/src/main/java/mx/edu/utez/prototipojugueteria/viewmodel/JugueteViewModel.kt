@@ -16,9 +16,9 @@ class JugueteViewModel(private val repository: JugueteRepository) : ViewModel(){
         initialValue = emptyList()
     )
 
-    fun addNewJuguete(id: Int, nombreJuguete: String, tipoJuguete: String, precio: Float, imagen: Int){
+    fun addNewJuguete( nombreJuguete: String, tipoJuguete: String, precio: Float, imagen: Int){
         viewModelScope.launch {
-            val newJuguete = Juguete(id = id, nombreJuguete = nombreJuguete, tipoJuguete = tipoJuguete, precio = precio, imagen = imagen )
+            val newJuguete = Juguete(nombreJuguete = nombreJuguete, tipoJuguete = tipoJuguete, precio = precio, imagen = imagen )
        repository.insertJuguete(newJuguete)
         }
     }
