@@ -34,9 +34,13 @@ fun JugueteScreen(viewModel: JugueteViewModel){
 
     Column (modifier = Modifier.fillMaxSize()){
         LazyColumn (modifier = Modifier.weight(1f)){
+
             TextField(value = id, onValueChange = {id = it}, label = {Text("ID")}, singleLine = true)
+
             TextField(value = nombrejuguete, onValueChange = {id = it}, label = {Text("ID")}, singleLine = true)
+
             TextField(value = tipojuguete, onValueChange = {id = it}, label = {Text("ID")}, singleLine = true)
+
             TextField(value = precio, onValueChange = {id = it}, label = {Text("ID")}, singleLine = true)
 
             Button(onClick = {
