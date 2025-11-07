@@ -1,4 +1,25 @@
 package mx.edu.utez.prototipojugueteria.viewmodel
 
-class JugueteViewModel {
+import androidx.lifecycle.ViewModel
+import mx.edu.utez.prototipojugueteria.data.model.Juguete
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import mx.edu.utez.prototipojugueteria.data.repository.JugueteRepository
+
+class JugueteViewModel(private val repository: JugueteRepository) : viewModel(){
+    val JugueteUiState: StateFlow<List<Juguete>> = repository.allJuguetes
+    .stateIn(
+        scope = viewModelScope,
+        started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000)
+        initialValue = emptyList()
+    )
+
+    fun addNewJuguete(id: Int, nombreJuguete: String, tipoJuguete: String, precio: Float, imagen: Int){
+        viewModelScope.launch {
+            val newJuguete = Juguete(id = id, nombreJuguete = nombreJuguete, tipoJuguete = tipoJuguete, precio = precio, imagen = imagen )
+       repository.insertJuguete(newJuguete)
+        }
+    }
 }
