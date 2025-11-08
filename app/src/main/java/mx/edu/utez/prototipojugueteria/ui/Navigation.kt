@@ -23,7 +23,7 @@ fun Navigation() {
     // --- ViewModels ---
     val loginViewModel: LoginViewModel = viewModel()
 
-/*
+
     // Instanciamos el ViewModel de juguetes para pasarlo a las pantallas
     val context = LocalContext.current
     val application = context.applicationContext as JugueteriaApp
@@ -31,27 +31,24 @@ fun Navigation() {
     // Instanciamos el ViewModel usando la Factory para inyectar el repositorio
     val jugueteViewModel: JugueteViewModel = viewModel(
         factory = JugueteViewModelFactory(application.repository)
-    )*/
+    )
     NavHost(navController = navController, startDestination = "login") {
         composable("login") {
             LoginScreen(loginViewModel, navController)
         }
         composable("forgot_password") { ForgotPasswordScreen(navController) }
         composable("registro") { RegistroScreen(navController) }
-       /* composable("agregarjuguete"){
+        composable("agregarjuguete"){
             AgregarJugueteScreen(navController, jugueteViewModel) // <-- Asegúrate de pasar el viewModel
-        }*/
-
-
-/*
-        composable("juguete") {
-            PrincipalScreen(
-                viewModel = jugueteViewModel,
-                navController = navController
-            )
         }
 
- */
+
+
+        composable("juguete") {
+            AgregarJugueteScreen(navController, jugueteViewModel)
+        }
+
+
 
 /*
         composable("juguete_detail") {
