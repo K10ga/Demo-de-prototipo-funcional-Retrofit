@@ -92,7 +92,7 @@ fun AgregarJugueteScreen(
                         nombreJuguete = nombre,
                         tipoJuguete = tipo,
                         precio = precioFloat,
-                        imagen = R.drawable.loginutez
+                        imagen = R.drawable.check
                     )
 
                     // Regresamos a la pantalla anterior
@@ -102,7 +102,7 @@ fun AgregarJugueteScreen(
                 Text("Confirmar")
                 Spacer(modifier = Modifier.width(4.dp))
                 Icon(
-                    painter = painterResource(id = R.drawable.loginutez),
+                    painter = painterResource(id = R.drawable.check),
                     contentDescription = "Confirmar"
                 )
             }
@@ -115,7 +115,7 @@ fun AgregarJugueteScreen(
                 Text("Cancelar")
                 Spacer(modifier = Modifier.width(4.dp))
                 Icon(
-                    painter = painterResource(id = R.drawable.loginutez),
+                    painter = painterResource(id = R.drawable.close),
                     contentDescription = "Cancelar"
                 )
             }
