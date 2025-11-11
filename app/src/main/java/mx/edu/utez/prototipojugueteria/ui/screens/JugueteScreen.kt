@@ -1,6 +1,6 @@
 package mx.edu.utez.prototipojugueteria.ui.screens
 
-
+/*
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -66,3 +66,5 @@ fun JugueteScreen(viewModel: JugueteViewModel){
 
     }
 }
+
+ */

@@ -1,5 +1,5 @@
 package mx.edu.utez.prototipojugueteria.ui.components
-
+/*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -62,3 +62,5 @@ fun JugueteCard(juguete: Juguete, onJugueteClick: (Juguete) -> Unit) {
         }
     }
 }
+
+ */

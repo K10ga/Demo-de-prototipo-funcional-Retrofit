@@ -15,12 +15,15 @@ import mx.edu.utez.prototipojugueteria.ui.Navigation
 import mx.edu.utez.prototipojugueteria.ui.theme.PrototipoJugueteriaTheme
 
 class MainActivity : ComponentActivity() {
+    private val appContainer by lazy {
+        (application as JugueteriaApp).container
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             PrototipoJugueteriaTheme {
-                Navigation()
+                Navigation(jugueteriaDataContainer = appContainer)
             }
         }
     }

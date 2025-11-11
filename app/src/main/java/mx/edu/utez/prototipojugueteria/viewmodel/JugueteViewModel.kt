@@ -1,5 +1,5 @@
 package mx.edu.utez.prototipojugueteria.viewmodel
-
+/*
 import androidx.lifecycle.ViewModel
 import mx.edu.utez.prototipojugueteria.data.model.Juguete
 import androidx.lifecycle.viewModelScope
@@ -23,3 +23,5 @@ class JugueteViewModel(private val repository: JugueteRepository) : ViewModel(){
         }
     }
 }
+
+ */

@@ -14,7 +14,6 @@ import mx.edu.utez.prototipojugueteria.ui.screens.RegistroScreen
 import mx.edu.utez.prototipojugueteria.viewmodel.JugueteViewModel
 import androidx.compose.ui.platform.LocalContext
 import mx.edu.utez.prototipojugueteria.JugueteriaApp
-import mx.edu.utez.prototipojugueteria.ui.screens.PrincipalScreen
 import mx.edu.utez.prototipojugueteria.viewmodel.JugueteViewModelFactory
 
 @Composable
@@ -39,9 +38,6 @@ fun Navigation() {
         }
         composable("forgot_password") { ForgotPasswordScreen(navController) }
         composable("registro") { RegistroScreen(navController) }
-        composable ("pincipalscreen"){
-            PrincipalScreen(navController, )
-        }
         composable("agregarjuguete"){
             AgregarJugueteScreen(navController, jugueteViewModel) // <-- Asegúrate de pasar el viewModel
         }

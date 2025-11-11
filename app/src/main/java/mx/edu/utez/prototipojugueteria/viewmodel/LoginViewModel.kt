@@ -12,7 +12,7 @@ class LoginViewModel : ViewModel() {
     fun login(navController: NavController) {
         if (username.value == "admin" && password.value == "123") {
             loginError.value = ""
-            navController.navigate("juguete") {
+            navController.navigate("juguetes") {
                 popUpTo("login") { inclusive = true }
             }
         } else {

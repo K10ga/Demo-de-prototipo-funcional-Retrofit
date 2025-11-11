@@ -1,5 +1,5 @@
 package mx.edu.utez.prototipojugueteria.viewmodel
-
+/*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import mx.edu.utez.prototipojugueteria.data.repository.JugueteRepository
@@ -23,3 +23,5 @@ class JugueteViewModelFactory(
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
+
+ */
