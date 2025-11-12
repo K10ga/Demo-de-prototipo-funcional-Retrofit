@@ -22,6 +22,8 @@ class JugueteListViewModel(private val repository: JugueteRepository) : ViewMode
     fun fetchJuguetes() {
         viewModelScope.launch {
             _juguetesUiState.value = repository.getJuguetes()
+            print(_juguetesUiState.value.get(0))
+
         }
     }
 }
