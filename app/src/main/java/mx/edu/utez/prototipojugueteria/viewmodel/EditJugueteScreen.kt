@@ -1,5 +1,5 @@
 package mx.edu.utez.prototipojugueteria.viewmodel
-
+/*
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -55,3 +55,5 @@ class EditJugueteViewModel(private val repository: JugueteRepository, savedState
         image = image
     )
 }
+
+ */

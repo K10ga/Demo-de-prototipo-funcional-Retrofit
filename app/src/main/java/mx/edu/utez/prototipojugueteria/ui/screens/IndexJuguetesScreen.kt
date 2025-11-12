@@ -22,22 +22,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import mx.edu.utez.prototipojugueteria.data.model.Juguete
-import mx.edu.utez.prototipojugueteria.ui.components.texts.JugueteCard // Importamos JugueteCard
+import mx.edu.utez.prototipojugueteria.ui.components.JugueteCard // Asegúrate de que esta sea la ruta correcta
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IndexJuguetesScreen(
-    titulo: String = "Catálogo de Juguetes",
-    juguetes: List<Juguete>, // Cambiado a Juguete
+    // titulo: String = "Catálogo de Juguetes", // <-- 1. Eliminamos esto
+    juguetes: List<Juguete>,
     onAddClick: () -> Unit,
-    onJugueteClick: (Long) -> Unit, // Cambiado a onJugueteClick
+    onJugueteClick: (Int) -> Unit, // <-- 2. Cambiado a Int
     navController: NavController
 ) {
     Scaffold(
-        topBar = { TopAppBar(title = { Text(titulo) }) },
+        topBar = { TopAppBar(title = { Text("Catálogo de Juguetes") }) }, // Ponemos el título aquí
         floatingActionButton = {
             FloatingActionButton(onClick = onAddClick) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar juguete") // Texto actualizado
+                Icon(Icons.Default.Add, contentDescription = "Agregar juguete")
             }
         }
     ) { padding ->
@@ -48,7 +48,7 @@ fun IndexJuguetesScreen(
                     .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Aún no hay juguetes.\nPulsa + para agregar.", textAlign = TextAlign.Center) // Texto actualizado
+                Text("Aún no hay juguetes.\nPulsa + para agregar.", textAlign = TextAlign.Center)
             }
         } else {
             LazyColumn(
@@ -56,9 +56,9 @@ fun IndexJuguetesScreen(
                 contentPadding = PaddingValues(vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(items = juguetes, key = { it.id }) { juguete -> // Iteramos sobre juguetes
-                    JugueteCard(j = juguete) { // Usamos JugueteCard
-                        onJugueteClick(juguete.id) // Usamos onJugueteClick
+                items(items = juguetes, key = { it.id }) { juguete ->
+                    JugueteCard(j = juguete) {
+                        onJugueteClick(juguete.id) // <-- Ahora coincide (Int) -> (Int)
                     }
                 }
             }

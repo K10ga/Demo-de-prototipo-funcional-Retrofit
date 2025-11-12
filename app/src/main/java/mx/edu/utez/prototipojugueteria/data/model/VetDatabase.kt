@@ -1,5 +1,5 @@
 package mx.edu.utez.prototipojugueteria.data.model
-
+/*
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
@@ -22,3 +22,5 @@ abstract class JugueteDataBase : RoomDatabase() {
             }
     }
 }
+
+ */

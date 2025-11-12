@@ -1,5 +1,5 @@
 package mx.edu.utez.prototipojugueteria.ui.screens
-
+/*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -149,3 +149,5 @@ fun EditJugueteContent(
         )
     }
 }
+
+ */

@@ -1,5 +1,5 @@
 package mx.edu.utez.prototipojugueteria.data
-
+/*
 import android.content.Context
 import mx.edu.utez.prototipojugueteria.data.model.JugueteDataBase
 import mx.edu.utez.prototipojugueteria.data.repository.JugueteRepository
@@ -10,3 +10,5 @@ class JugueteriaDataContainer(context: Context) {
         JugueteRepository(JugueteDataBase.get(context).jugueteDao())
     }
 }
+
+ */

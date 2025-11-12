@@ -1,5 +1,5 @@
 package mx.edu.utez.prototipojugueteria.data.model
-
+/*
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -25,3 +25,5 @@ interface JugueteDao{
     @Query("SELECT * FROM juguetes WHERE id = :id")
     fun getById(id: Long): Flow<Juguete>
 }
+
+ */

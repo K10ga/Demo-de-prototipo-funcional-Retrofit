@@ -1,5 +1,5 @@
 package mx.edu.utez.prototipojugueteria
-
+/*
 import android.app.Application
 // Importa la clase renombrada
 import mx.edu.utez.prototipojugueteria.data.JugueteriaDataContainer
@@ -16,3 +16,5 @@ class JugueteriaApp : Application() {
         container = JugueteriaDataContainer(this)
     }
 }
+
+ */

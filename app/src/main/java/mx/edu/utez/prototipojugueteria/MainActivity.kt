@@ -4,28 +4,24 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import mx.edu.utez.prototipojugueteria.ui.Navigation
 import mx.edu.utez.prototipojugueteria.ui.theme.PrototipoJugueteriaTheme
 
 class MainActivity : ComponentActivity() {
-    private val appContainer by lazy {
-        (application as JugueteriaApp).container
-    }
+
+    // Ya no necesitas 'appContainer' ni 'JugueteriaApp'
+    // private val appContainer by lazy { ... }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             PrototipoJugueteriaTheme {
-                Navigation(jugueteriaDataContainer = appContainer)
+                // Simplemente llama a Navigation()
+                // Navigation se encargará de crear el repositorio,
+                // tal como lo hicimos en el paso anterior.
+                Navigation()
             }
         }
     }
 }
-
