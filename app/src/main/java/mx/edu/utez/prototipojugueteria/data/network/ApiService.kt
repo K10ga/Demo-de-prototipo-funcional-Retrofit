@@ -1,27 +1,48 @@
 package mx.edu.utez.prototipojugueteria.data.network
 
-import mx.edu.utez.prototipojugueteria.data.model.Juguete // Importa el Juguete adaptado
+import mx.edu.utez.prototipojugueteria.data.model.Juguete
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import retrofit2.Response // Importar Response para el delete
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
+// Imports añadidos
+import retrofit2.http.DELETE
+import retrofit2.http.PUT
+import retrofit2.http.Path
 
 interface ApiService {
 
-    @GET("juguetes") // Cambiado a endpoint de juguetes
+    @GET("juguetes")
     suspend fun getJuguetes(): List<Juguete>
 
     @Multipart
-    @POST("juguetes") // Cambiado a endpoint de juguetes
+    @POST("juguetes")
     suspend fun addJuguete(
-        // Partes para los campos del juguete
         @Part("nombre") nombre: RequestBody,
         @Part("tipoJuguete") tipoJuguete: RequestBody,
-        @Part("precio") precio: RequestBody, // El precio (Double) también se envía como RequestBody
-
-        // Parte para la imagen
+        @Part("precio") precio: RequestBody,
         @Part image: MultipartBody.Part?
     ): Juguete
+
+    // --- NUEVO: Obtener un solo juguete por ID ---
+    @GET("juguetes/{id}")
+    suspend fun getJugueteById(@Path("id") id: Int): Juguete
+
+    // --- NUEVO: Actualizar un juguete (también Multipart) ---
+    @Multipart
+    @PUT("juguetes/{id}") // Usamos PUT para actualizar
+    suspend fun updateJuguete(
+        @Path("id") id: Int,
+        @Part("nombre") nombre: RequestBody,
+        @Part("tipoJuguete") tipoJuguete: RequestBody,
+        @Part("precio") precio: RequestBody,
+        @Part image: MultipartBody.Part? // Permite enviar una nueva imagen o no
+    ): Juguete
+
+    // --- NUEVO: Eliminar un juguete ---
+    @DELETE("juguetes/{id}")
+    suspend fun deleteJuguete(@Path("id") id: Int): Response<Unit> // No esperamos contenido de vuelta
 }
