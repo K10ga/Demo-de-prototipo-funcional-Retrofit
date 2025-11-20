@@ -8,7 +8,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.InputStream
-
+import mx.edu.utez.prototipojugueteria.data.model.User
 class JugueteRepository(
     private val apiService: ApiService,
     private val context: Context
@@ -130,4 +130,25 @@ class JugueteRepository(
             null
         }
     }
+    //registro
+    suspend fun registerUser(user: User): Boolean {
+        return try {
+            apiService.registerUser(user)
+            true // Éxito
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false // Error
+        }
+    }
+    // --- NUEVO: Función de Login ---
+    suspend fun login(user: User): Boolean {
+        return try {
+            val response = apiService.loginUser(user)
+            response.isSuccessful // Devuelve true si es 200, false si es 401
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
 }

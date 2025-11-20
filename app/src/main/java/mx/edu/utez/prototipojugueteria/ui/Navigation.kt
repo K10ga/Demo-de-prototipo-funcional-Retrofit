@@ -31,6 +31,8 @@ import mx.edu.utez.prototipojugueteria.ui.screens.EditJugueteScreen
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.Lifecycle
 
+import mx.edu.utez.prototipojugueteria.viewmodel.RegisterViewModel
+
 @Composable
 fun Navigation() {
     val navController = rememberNavController()
@@ -50,11 +52,16 @@ fun Navigation() {
 
         // --- Rutas de Usuario (no usan la factory) ---
         composable("login") {
-            val viewModel: LoginViewModel = viewModel()
+            // CAMBIO IMPORTANTE: Usar la factory, no viewModel() vacío
+            val viewModel: LoginViewModel = viewModel(factory = jugueteFactory)
             LoginScreen(viewModel, navController)
         }
         composable("forgot_password") { ForgotPasswordScreen(navController) }
-        composable("registro") { RegistroScreen(navController) }
+        composable("registro") {
+            // Usamos la factory existente para crear el RegisterViewModel
+            val viewModel: RegisterViewModel = viewModel(factory = jugueteFactory)
+            RegistroScreen(viewModel, navController)
+        }
 
         // --- Rutas CRUD (ambas usan el MISMO ViewModel) ---
 

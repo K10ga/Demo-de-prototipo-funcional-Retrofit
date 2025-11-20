@@ -14,10 +14,20 @@ class JugueteViewModelFactory(
     private val context: Context // <-- Pasamos el context
 ) : ViewModelProvider.Factory {
 
+    // ...
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(JugueteViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return JugueteViewModel(repository) as T
+        }
+        if (modelClass.isAssignableFrom(RegisterViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return RegisterViewModel(repository) as T
+        }
+        // --- NUEVO: Agregamos LoginViewModel ---
+        if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return LoginViewModel(repository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

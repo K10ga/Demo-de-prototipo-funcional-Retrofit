@@ -12,6 +12,11 @@ import retrofit2.http.Part
 import retrofit2.http.DELETE
 import retrofit2.http.PUT
 import retrofit2.http.Path
+//nuevo
+import mx.edu.utez.prototipojugueteria.data.model.User
+import retrofit2.http.Body
+
+
 
 interface ApiService {
 
@@ -45,4 +50,8 @@ interface ApiService {
     // --- NUEVO: Eliminar un juguete ---
     @DELETE("juguetes/{id}")
     suspend fun deleteJuguete(@Path("id") id: Int): Response<Unit> // No esperamos contenido de vuelta
+    @POST("register")
+    suspend fun registerUser(@Body user: User): User
+    @POST("login")
+    suspend fun loginUser(@Body user: User): Response<Any>
 }
