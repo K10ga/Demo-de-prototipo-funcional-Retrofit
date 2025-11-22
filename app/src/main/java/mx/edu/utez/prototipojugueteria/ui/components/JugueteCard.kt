@@ -1,7 +1,7 @@
 package mx.edu.utez.prototipojugueteria.ui.components
 
-// Importa los componentes de Compose
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,30 +19,28 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-// Importa Coil (AsyncImage) y tu modelo de Juguete
 import coil.compose.AsyncImage
-import mx.edu.utez.prototipojugueteria.R // Importa tu R local
+import mx.edu.utez.prototipojugueteria.R
 import mx.edu.utez.prototipojugueteria.data.model.Juguete
 
 /**
- * Esta es la tarjeta adaptada para Juguetes, basada en tu PetCard.
- * Recibe el Juguete y una función onClick.
+ * Esta es la tarjeta adaptada para Juguetes.
+ * Ahora incluye la etiqueta de VENDIDO y el nombre del VENDEDOR.
  */
 @Composable
 fun JugueteCard(
-    j: Juguete, // Cambiado a 'j' para Juguete
+    j: Juguete,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit // Añadido para que la tarjeta sea clickeable
+    onClick: () -> Unit
 ) {
 
-    // Color de fondo (puedes cambiarlo)
     val cardBgColor = Color(0xFFF5F8F0)
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp) // Reducido el padding vertical
-            .clickable { onClick() }, // Se llama al onClick
+            .padding(horizontal = 16.dp)
+            .clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         colors = CardDefaults.cardColors(containerColor = cardBgColor),
         shape = RoundedCornerShape(12.dp)
@@ -51,7 +49,7 @@ fun JugueteCard(
             modifier = Modifier.padding(16.dp)
         ) {
             // --- 1. Encabezado ---
-            JugueteHeader() // Helper adaptado
+            JugueteHeader()
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -60,25 +58,42 @@ fun JugueteCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Top
             ) {
-                // --- Columna Izquierda (Foto) ---
-                Column(
+                // --- Columna Izquierda (Foto con Etiqueta) ---
+                // Usamos Box para poder poner la etiqueta "VENDIDO" encima de la imagen
+                Box(
                     modifier = Modifier.weight(0.4f),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    contentAlignment = Alignment.TopStart
                 ) {
-                    // --- AsyncImage para cargar la URL ---
-                    AsyncImage(
-                        model = j.imageUrl, // <-- Dato de Juguete
-                        contentDescription = "Foto de ${j.nombre}", // <-- Dato de Juguete
-                        // Placeholder (usa tu imagen de login)
-                        placeholder = painterResource(id = R.drawable.loginutez),
-                        error = painterResource(id = R.drawable.loginutez),
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(3f / 4f)
-                            .clip(RoundedCornerShape(8.dp))
-                            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        AsyncImage(
+                            model = j.imageUrl,
+                            contentDescription = "Foto de ${j.nombre}",
+                            placeholder = painterResource(id = R.drawable.loginutez),
+                            error = painterResource(id = R.drawable.loginutez),
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(3f / 4f)
+                                .clip(RoundedCornerShape(8.dp))
+                                .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+                        )
+                    }
+
+                    // --- Lógica Visual: Etiqueta VENDIDO ---
+                    if (j.vendido) {
+                        Text(
+                            text = "VENDIDO",
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .background(Color.Red)
+                                .padding(4.dp)
+                                .align(Alignment.TopStart) // Esquina superior izquierda
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
@@ -87,11 +102,13 @@ fun JugueteCard(
                 Column(
                     modifier = Modifier.weight(0.6f)
                 ) {
-                    // --- Campos de Datos Adaptados ---
-                    DataField("ID Juguete:", j.id.toString())
+                    DataField("ID:", j.id.toString())
                     DataField("Nombre:", j.nombre.uppercase())
                     DataField("Tipo:", j.tipoJuguete ?: "No especificado")
                     DataField("Precio:", "$ ${j.precio}")
+
+                    // --- NUEVO: Mostrar el Vendedor ---
+                    DataField("Vendedor:", j.vendedorNombre ?: "Anónimo")
                 }
             }
         }
@@ -109,20 +126,20 @@ private fun JugueteHeader() {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Image(
-            painter = painterResource(id = R.drawable.loginutez), // Tu logo
+            painter = painterResource(id = R.drawable.loginutez),
             contentDescription = "Logo",
             modifier = Modifier.size(50.dp)
         )
 
         Column(horizontalAlignment = Alignment.End) {
             Text(
-                text = "JUGUETE", // <-- Adaptado
+                text = "JUGUETE",
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
                 letterSpacing = 2.sp
             )
             Text(
-                text = "CATÁLOGO", // <-- Adaptado
+                text = "CATÁLOGO",
                 fontSize = 12.sp,
                 color = Color.DarkGray
             )
@@ -131,7 +148,7 @@ private fun JugueteHeader() {
 }
 
 /**
- * Helper privado para los campos de texto (Este no cambió)
+ * Helper privado para los campos de texto
  */
 @Composable
 private fun DataField(

@@ -18,5 +18,11 @@ data class Juguete(
     val nombre: String,
     val tipoJuguete: String?,
     val precio: Double,
-    val imageUrl: String? // Antes era '@DrawableRes val image: Int'
+    val imageUrl: String?, // Antes era '@DrawableRes val image: Int'
+
+
+    // --- NUEVOS CAMPOS ---
+    val vendedorNombre: String? = "Anónimo", // Nombre del dueño
+    val userId: Int? = null,                 // ID del dueño para saber si es mío
+    val vendido: Boolean = false             // ¿Ya se vendió
 )

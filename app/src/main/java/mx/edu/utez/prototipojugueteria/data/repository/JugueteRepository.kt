@@ -9,14 +9,12 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.InputStream
 import mx.edu.utez.prototipojugueteria.data.model.User
+
 class JugueteRepository(
-    private val apiService: ApiService,
+    val apiService: ApiService,
     private val context: Context
 ) {
 
-    /**
-     * Obtiene la lista completa de juguetes desde la API.
-     */
     suspend fun getJuguetes(): List<Juguete> {
         return try {
             apiService.getJuguetes()
@@ -26,9 +24,6 @@ class JugueteRepository(
         }
     }
 
-    /**
-     * Obtiene un solo juguete por su ID.
-     */
     suspend fun getJugueteById(id: Int): Juguete? {
         return try {
             apiService.getJugueteById(id)
@@ -38,26 +33,30 @@ class JugueteRepository(
         }
     }
 
-    /**
-     * Inserta un nuevo juguete. No devuelve nada.
-     * El refresco se maneja desde el Navigation.
-     */
     suspend fun insertJuguete(
         nombre: String,
         tipoJuguete: String?,
         precio: Double,
-        imageUri: Uri?
-    ) { // <-- Ya no devuelve Juguete?
+        imageUri: Uri?,
+        userId: Int?
+    ) {
         try {
             val nombreBody = nombre.toRequestBody("text/plain".toMediaTypeOrNull())
             val tipoBody = (tipoJuguete ?: "").toRequestBody("text/plain".toMediaTypeOrNull())
             val precioBody = precio.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+
+            // Convertimos el ID a RequestBody
+            val userIdBody = (userId ?: 0).toString().toRequestBody("text/plain".toMediaTypeOrNull())
+
             val imagePart = uriToMultipart(imageUri)
 
+            // --- AQUÍ ESTABA EL ERROR ---
+            // Cambiamos "user_id =" por "userId =" para que coincida con ApiService
             apiService.addJuguete(
                 nombre = nombreBody,
                 tipoJuguete = tipoBody,
                 precio = precioBody,
+                userId = userIdBody, // <--- CORREGIDO (userId sin guion bajo)
                 image = imagePart
             )
         } catch (e: Exception) {
@@ -65,17 +64,13 @@ class JugueteRepository(
         }
     }
 
-    /**
-     * Actualiza un juguete. No devuelve nada.
-     * El refresco se maneja desde el Navigation.
-     */
     suspend fun updateJuguete(
         id: Int,
         nombre: String,
         tipoJuguete: String?,
         precio: Double,
         imageUri: Uri?
-    ) { // <-- Ya no devuelve Juguete?
+    ) {
         try {
             val nombreBody = nombre.toRequestBody("text/plain".toMediaTypeOrNull())
             val tipoBody = (tipoJuguete ?: "").toRequestBody("text/plain".toMediaTypeOrNull())
@@ -94,9 +89,6 @@ class JugueteRepository(
         }
     }
 
-    /**
-     * Elimina un juguete de la API por su ID.
-     */
     suspend fun deleteJuguete(id: Int) {
         try {
             apiService.deleteJuguete(id)
@@ -105,10 +97,26 @@ class JugueteRepository(
         }
     }
 
-    /**
-     * Helper privado para convertir una Uri (Galería/Cámara)
-     * a un MultipartBody.Part (lo que Retrofit necesita).
-     */
+    suspend fun registerUser(user: User): Boolean {
+        return try {
+            apiService.registerUser(user)
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    suspend fun login(user: User): Boolean {
+        return try {
+            val response = apiService.loginUser(user)
+            response.isSuccessful
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
     private fun uriToMultipart(imageUri: Uri?): MultipartBody.Part? {
         if (imageUri == null) return null
 
@@ -120,7 +128,6 @@ class JugueteRepository(
 
             if (bytes != null && type != null) {
                 val requestFile = bytes.toRequestBody(type.toMediaTypeOrNull())
-                // "image" debe coincidir con el nombre esperado en la API de Flask
                 MultipartBody.Part.createFormData("image", "image.jpg", requestFile)
             } else {
                 null
@@ -130,25 +137,4 @@ class JugueteRepository(
             null
         }
     }
-    //registro
-    suspend fun registerUser(user: User): Boolean {
-        return try {
-            apiService.registerUser(user)
-            true // Éxito
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false // Error
-        }
-    }
-    // --- NUEVO: Función de Login ---
-    suspend fun login(user: User): Boolean {
-        return try {
-            val response = apiService.loginUser(user)
-            response.isSuccessful // Devuelve true si es 200, false si es 401
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
-        }
-    }
-
 }

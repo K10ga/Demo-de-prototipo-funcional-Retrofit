@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import mx.edu.utez.prototipojugueteria.data.model.Juguete
 import mx.edu.utez.prototipojugueteria.data.repository.JugueteRepository
-
+import mx.edu.utez.prototipojugueteria.utils.UserSession
 class JugueteViewModel(private val repository: JugueteRepository) : ViewModel() {
 
     // --- 1. Estado para la LISTA de juguetes ---
@@ -45,7 +45,8 @@ class JugueteViewModel(private val repository: JugueteRepository) : ViewModel() 
         imageUri: Uri?
     ) {
         viewModelScope.launch {
-            repository.insertJuguete(nombre, tipoJuguete, precio, imageUri)
+            val currentUserId = UserSession.currentUserId
+            repository.insertJuguete(nombre, tipoJuguete, precio, imageUri, currentUserId)
             // ¡Ya no hay 'fetchJuguetes()' ni '_juguetesUiState.update' aquí!
         }
     }

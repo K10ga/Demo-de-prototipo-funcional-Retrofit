@@ -29,6 +29,7 @@ interface ApiService {
         @Part("nombre") nombre: RequestBody,
         @Part("tipoJuguete") tipoJuguete: RequestBody,
         @Part("precio") precio: RequestBody,
+        @Part("user_id") userId: RequestBody,
         @Part image: MultipartBody.Part?
     ): Juguete
 
