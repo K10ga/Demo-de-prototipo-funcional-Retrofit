@@ -6,15 +6,23 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -22,77 +30,114 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import mx.edu.utez.prototipojugueteria.R // Asegúrate de tener un drawable (ej. el logo)
-import mx.edu.utez.prototipojugueteria.viewmodel.JugueteViewModel // <-- ¡Importa el VM unificado!
+import mx.edu.utez.prototipojugueteria.R
+import mx.edu.utez.prototipojugueteria.viewmodel.JugueteViewModel
 import java.io.File
-import androidx.compose.material3.MaterialTheme
 
 @Composable
 fun CreateJugueteScreen(
-    viewModel: JugueteViewModel, // <-- 1. Recibe el JugueteViewModel unificado
+    viewModel: JugueteViewModel,
     navController: NavController
 ) {
     val context = LocalContext.current
 
-    // --- 2. Estado para la URI de la imagen ---
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-    var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
+    // --- 1. Estado para la LISTA de URIs ---
+    var selectedImageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
-    // --- 3. Launchers (Galería, Cámara, Permiso) ---
+    // Variable temporal para la cámara (guarda la foto actual antes de agregarla a la lista)
+    var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
+
+    // --- 2. Launchers ---
+
+    // Galería Múltiple
     val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri ->
-            if (uri != null) {
-                selectedImageUri = uri
+        contract = ActivityResultContracts.PickMultipleVisualMedia(),
+        onResult = { uris ->
+            if (uris.isNotEmpty()) {
+                selectedImageUris = uris // Reemplaza o agrega según prefieras
             }
         }
     )
+
+    // Cámara (Toma una a la vez y la agrega a la lista)
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
-            if (success) {
-                selectedImageUri = cameraImageUri
+            if (success && tempCameraUri != null) {
+                // Agregamos la foto nueva a la lista existente
+                selectedImageUris = selectedImageUris + tempCameraUri!!
             }
         }
     )
+
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
             if (isGranted) {
                 val newUri = createImageUri(context)
-                cameraImageUri = newUri
+                tempCameraUri = newUri
                 cameraLauncher.launch(newUri)
             }
         }
     )
 
-    // --- 4. Estado para los campos de texto ---
+    // --- 3. Campos de texto ---
     var nombre by remember { mutableStateOf("") }
     var tipoJuguete by remember { mutableStateOf("") }
-    var precio by remember { mutableStateOf("") } // Usar String para el TextField
+    var precio by remember { mutableStateOf("") }
 
-    // --- 5. Layout (copiado de PetScreen) ---
+    // --- 4. Layout ---
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Registrar Nuevo Juguete", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Vista previa de la imagen
-        AsyncImage(
-            model = selectedImageUri,
-            contentDescription = "Foto del nuevo juguete",
-            placeholder = painterResource(id = R.drawable.loginutez), // Cambia a tu placeholder
-            error = painterResource(id = R.drawable.loginutez),       // Cambia a tu placeholder
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(150.dp)
-                .clip(CircleShape)
-        )
+        // --- VISOR DE IMÁGENES (Carrusel) ---
+        if (selectedImageUris.isNotEmpty()) {
+            val pagerState = rememberPagerState(pageCount = { selectedImageUris.size })
+
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+                    .clip(RoundedCornerShape(12.dp))
+            ) { page ->
+                AsyncImage(
+                    model = selectedImageUris[page],
+                    contentDescription = "Foto seleccionada",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            // Indicador de cuántas fotos hay
+            Text(
+                text = "${pagerState.currentPage + 1} / ${selectedImageUris.size}",
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        } else {
+            // Placeholder si no hay fotos
+            AsyncImage(
+                model = null,
+                contentDescription = "Placeholder",
+                placeholder = painterResource(id = R.drawable.loginutez),
+                error = painterResource(id = R.drawable.loginutez),
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .size(150.dp)
+                    .clip(CircleShape)
+                    .background(Color.LightGray)
+            )
+            Text("Sin fotos seleccionadas", style = MaterialTheme.typography.bodySmall)
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -106,12 +151,12 @@ fun CreateJugueteScreen(
                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                 )
             }) {
-                Text("Galería")
+                Text("Galería (Múltiple)")
             }
             Button(onClick = {
                 cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
             }) {
-                Text("Tomar Foto")
+                Text("Cámara (+1)")
             }
         }
 
@@ -143,17 +188,16 @@ fun CreateJugueteScreen(
         // Botón de Guardar
         Button(
             onClick = {
-                val precioDouble = precio.toDoubleOrNull() ?: 0.0 // Convertir a Double
+                val precioDouble = precio.toDoubleOrNull() ?: 0.0
 
-                // --- 6. Llamar al ViewModel unificado ---
+                // Llamamos a la nueva función que acepta LISTA de URIs
                 viewModel.addNewJuguete(
                     nombre = nombre,
                     tipoJuguete = tipoJuguete,
                     precio = precioDouble,
-                    imageUri = selectedImageUri
+                    imageUris = selectedImageUris // <-- Enviamos la lista
                 )
 
-                // Regresar a la pantalla anterior
                 navController.popBackStack()
             },
             modifier = Modifier.fillMaxWidth()
@@ -163,7 +207,7 @@ fun CreateJugueteScreen(
     }
 }
 
-// --- Función auxiliar para la cámara (igual que en PetScreen) ---
+// Función auxiliar para la cámara
 private fun createImageUri(context: Context): Uri {
     val imageDir = File(context.cacheDir, "images")
     imageDir.mkdirs()

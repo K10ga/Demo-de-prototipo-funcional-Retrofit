@@ -1,20 +1,18 @@
 package mx.edu.utez.prototipojugueteria.ui.screens
 
-import android.Manifest
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,165 +20,142 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import mx.edu.utez.prototipojugueteria.R
+import mx.edu.utez.prototipojugueteria.utils.UserSession
 import mx.edu.utez.prototipojugueteria.viewmodel.JugueteViewModel
 
 @Composable
-fun EditJugueteScreen(
-    viewModel: JugueteViewModel,
-    navController: NavController,
-    jugueteId: Int
-) {
-    val context = LocalContext.current
+fun EditJugueteScreen(viewModel: JugueteViewModel, navController: NavController, jugueteId: Int) {
+    val juguete by viewModel.selectedJuguete.collectAsState()
 
-    // --- 1. Observar el juguete seleccionado del ViewModel ---
-    val jugueteState by viewModel.selectedJuguete.collectAsState()
-    val juguete = jugueteState
-
-    // --- 2. Estado local para los campos (se llenarán desde el juguete cargado) ---
+    // Datos locales
     var nombre by remember { mutableStateOf("") }
-    var tipoJuguete by remember { mutableStateOf("") }
+    var tipo by remember { mutableStateOf("") }
     var precio by remember { mutableStateOf("") }
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-    var existingImageUrl by remember { mutableStateOf<String?>(null) }
+    // Lista de Uris para NUEVAS fotos
+    var newPhotosUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
-    // --- 3. Cargar el juguete una sola vez ---
-    LaunchedEffect(jugueteId) {
-        viewModel.loadJuguete(jugueteId)
-    }
+    LaunchedEffect(jugueteId) { viewModel.loadJuguete(jugueteId) }
 
-    // --- 4. Sincronizar el estado local cuando el juguete se cargue ---
     LaunchedEffect(juguete) {
-        if (juguete != null) {
-            nombre = juguete.nombre
-            tipoJuguete = juguete.tipoJuguete ?: ""
-            precio = juguete.precio.toString()
-            existingImageUrl = juguete.imageUrl
+        juguete?.let {
+            nombre = it.nombre
+            tipo = it.tipoJuguete ?: ""
+            precio = it.precio.toString()
         }
     }
+    DisposableEffect(Unit) { onDispose { viewModel.clearSelectedJuguete() } }
 
-    // --- 5. Limpiar el juguete seleccionado al salir ---
-    DisposableEffect(Unit) {
-        onDispose {
-            viewModel.clearSelectedJuguete()
-        }
+    // Launcher Múltiple
+    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
+        if (uris.isNotEmpty()) newPhotosUris = uris
     }
 
-    // --- 6. Launchers (Galería, Cámara, Permiso) - Igual que en Create ---
-    // (Omitido por brevedad, es idéntico a tu CreateJugueteScreen)
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri ->
-            if (uri != null) {
-                selectedImageUri = uri
-                existingImageUrl = null // Ocultar la imagen existente si se selecciona una nueva
-            }
-        }
-    )
-    // (Aquí irían los launchers de Cámara y Permiso, si los usas)
+    // --- UI ---
+    if (juguete == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+    } else {
+        val j = juguete!!
+        val isOwner = (j.userId == UserSession.currentUserId)
+        val isSold = j.vendido
 
-    // --- 7. Layout ---
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()), // Añadido para scroll
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        if (juguete == null && existingImageUrl == null) {
-            // Muestra un indicador de carga mientras el juguete se obtiene
-            CircularProgressIndicator()
-            Text("Cargando juguete...")
-        } else {
-            // Contenido de la pantalla (cuando ya cargó)
-            Text("Editar Juguete", style = MaterialTheme.typography.headlineMedium)
+        Column(Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState())) {
 
-            Spacer(modifier = Modifier.height(24.dp))
+            // --- CARRUSEL DE FOTOS ---
+            // Mezclamos las fotos existentes (URLs) con las nuevas seleccionadas (URIs)
+            val allImages: List<Any> = if (newPhotosUris.isNotEmpty()) newPhotosUris else j.imagenesUrls
 
-            // Vista previa de la imagen
-            AsyncImage(
-                // Mostrar la nueva imagen (selectedImageUri) si existe,
-                // si no, mostrar la imagen que ya tenía (existingImageUrl)
-                model = selectedImageUri ?: existingImageUrl,
-                contentDescription = "Foto del juguete",
-                placeholder = painterResource(id = R.drawable.loginutez),
-                error = painterResource(id = R.drawable.loginutez),
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(150.dp)
-                    .clip(CircleShape)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Botón de Galería
-            Button(onClick = {
-                galleryLauncher.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                )
-            }) {
-                Text("Cambiar Foto")
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Campos de texto
-            TextField(
-                value = nombre,
-                onValueChange = { nombre = it },
-                label = { Text("Nombre:") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            TextField(
-                value = tipoJuguete,
-                onValueChange = { tipoJuguete = it },
-                label = { Text("Tipo de Juguete:") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            TextField(
-                value = precio,
-                onValueChange = { precio = it },
-                label = { Text("Precio:") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(30.dp))
-
-            // --- Botón de Actualizar ---
-            Button(
-                onClick = {
-                    val precioDouble = precio.toDoubleOrNull() ?: 0.0
-                    viewModel.updateJuguete(
-                        id = jugueteId,
-                        nombre = nombre,
-                        tipoJuguete = tipoJuguete,
-                        precio = precioDouble,
-                        imageUri = selectedImageUri // Si es null, el repo no manda imagen
+            if (allImages.isNotEmpty()) {
+                val pagerState = androidx.compose.foundation.pager.rememberPagerState(pageCount = { allImages.size })
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxWidth().height(250.dp).clip(RoundedCornerShape(12.dp))
+                ) { page ->
+                    AsyncImage(
+                        model = allImages[page],
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
                     )
-                    navController.popBackStack() // Regresar a la lista
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = "Actualizar Juguete")
+                }
+                // Indicador simple (1/3)
+                Text(
+                    text = "${pagerState.currentPage + 1}/${allImages.size}",
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            } else {
+                // Placeholder si no hay nada
+                Box(Modifier.fillMaxWidth().height(250.dp).background(Color.LightGray), contentAlignment = Alignment.Center) {
+                    Text("Sin fotos")
+                }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
-            // --- Botón de Eliminar ---
-            Button(
-                onClick = {
-                    viewModel.deleteJuguete(jugueteId)
-                    navController.popBackStack() // Regresar a la lista
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-            ) {
-                Text(text = "Eliminar Juguete")
+            // --- ESTADO VENDIDO ---
+            if (isSold) {
+                Text(
+                    text = "VENDIDO a ${j.compradorNombre ?: "Alguien"}",
+                    color = Color.Red,
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+                Spacer(Modifier.height(8.dp))
+            }
+
+            // --- CAMPOS ---
+            // Si soy dueño y NO está vendido, puedo editar. Si no, solo lectura.
+            val canEdit = isOwner && !isSold
+
+            OutlinedTextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Nombre") }, enabled = canEdit, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = tipo, onValueChange = { tipo = it }, label = { Text("Tipo") }, enabled = canEdit, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = precio, onValueChange = { precio = it }, label = { Text("Precio") }, enabled = canEdit, modifier = Modifier.fillMaxWidth())
+
+            if (canEdit) {
+                Spacer(Modifier.height(8.dp))
+                Button(onClick = { galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }) {
+                    Text("Seleccionar Fotos (Reemplaza actuales)")
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            // --- LÓGICA DE BOTONES ---
+            if (isOwner) {
+                // DUEÑO: Eliminar o Guardar Cambios
+                if (!isSold) {
+                    Button(
+                        onClick = {
+                            viewModel.updateJuguete(jugueteId, nombre, tipo, precio.toDoubleOrNull()?:0.0, newPhotosUris)
+                            navController.popBackStack()
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text("Guardar Cambios") }
+
+                    Spacer(Modifier.height(8.dp))
+                }
+
+                Button(
+                    onClick = {
+                        viewModel.deleteJuguete(jugueteId)
+                        navController.popBackStack()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) { Text("Eliminar Juguete") }
+
+            } else {
+                // NO DUEÑO: Comprar
+                if (!isSold) {
+                    Button(
+                        onClick = { viewModel.comprarJuguete(jugueteId) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
+                    ) { Text("COMPRAR") }
+                }
             }
         }
     }

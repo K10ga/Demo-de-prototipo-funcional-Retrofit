@@ -8,7 +8,7 @@ object RetrofitInstance {
     // --- PENDIENTE ---
     // Como dijiste, la IP está pendiente.
     // Deberás poner aquí la URL base de tu nueva API de juguetes.
-    private const val BASE_URL = "http://192.168.0.5:5000"
+    private const val BASE_URL = "http://192.168.0.6:5000/"
 
     private val retrofit by lazy {
         Retrofit.Builder()

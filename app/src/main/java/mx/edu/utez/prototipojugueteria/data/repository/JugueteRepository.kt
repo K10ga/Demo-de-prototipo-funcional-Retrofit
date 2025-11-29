@@ -4,11 +4,11 @@ import android.content.Context
 import android.net.Uri
 import mx.edu.utez.prototipojugueteria.data.model.Juguete
 import mx.edu.utez.prototipojugueteria.data.network.ApiService
+import mx.edu.utez.prototipojugueteria.data.model.User
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.InputStream
-import mx.edu.utez.prototipojugueteria.data.model.User
 
 class JugueteRepository(
     val apiService: ApiService,
@@ -33,31 +33,29 @@ class JugueteRepository(
         }
     }
 
+    // --- AHORA RECIBE UNA LISTA DE URIs ---
     suspend fun insertJuguete(
         nombre: String,
         tipoJuguete: String?,
         precio: Double,
-        imageUri: Uri?,
+        imageUris: List<Uri>,
         userId: Int?
     ) {
         try {
             val nombreBody = nombre.toRequestBody("text/plain".toMediaTypeOrNull())
             val tipoBody = (tipoJuguete ?: "").toRequestBody("text/plain".toMediaTypeOrNull())
             val precioBody = precio.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-
-            // Convertimos el ID a RequestBody
             val userIdBody = (userId ?: 0).toString().toRequestBody("text/plain".toMediaTypeOrNull())
 
-            val imagePart = uriToMultipart(imageUri)
+            // Convertimos la lista de URIs a lista de Partes
+            val imageParts = urisToMultipart(imageUris)
 
-            // --- AQUÍ ESTABA EL ERROR ---
-            // Cambiamos "user_id =" por "userId =" para que coincida con ApiService
             apiService.addJuguete(
                 nombre = nombreBody,
                 tipoJuguete = tipoBody,
                 precio = precioBody,
-                userId = userIdBody, // <--- CORREGIDO (userId sin guion bajo)
-                image = imagePart
+                userId = userIdBody,
+                images = imageParts
             )
         } catch (e: Exception) {
             e.printStackTrace()
@@ -69,20 +67,21 @@ class JugueteRepository(
         nombre: String,
         tipoJuguete: String?,
         precio: Double,
-        imageUri: Uri?
+        imageUris: List<Uri>
     ) {
         try {
             val nombreBody = nombre.toRequestBody("text/plain".toMediaTypeOrNull())
             val tipoBody = (tipoJuguete ?: "").toRequestBody("text/plain".toMediaTypeOrNull())
             val precioBody = precio.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-            val imagePart = uriToMultipart(imageUri)
+
+            val imageParts = urisToMultipart(imageUris)
 
             apiService.updateJuguete(
                 id = id,
                 nombre = nombreBody,
                 tipoJuguete = tipoBody,
                 precio = precioBody,
-                image = imagePart
+                images = imageParts
             )
         } catch (e: Exception) {
             e.printStackTrace()
@@ -97,12 +96,21 @@ class JugueteRepository(
         }
     }
 
+    // --- NUEVO: FUNCION COMPRAR ---
+    suspend fun comprarJuguete(jugueteId: Int, compradorId: Int) {
+        try {
+            val body = mapOf("comprador_id" to compradorId)
+            apiService.comprarJuguete(jugueteId, body)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     suspend fun registerUser(user: User): Boolean {
         return try {
             apiService.registerUser(user)
             true
         } catch (e: Exception) {
-            e.printStackTrace()
             false
         }
     }
@@ -112,29 +120,31 @@ class JugueteRepository(
             val response = apiService.loginUser(user)
             response.isSuccessful
         } catch (e: Exception) {
-            e.printStackTrace()
             false
         }
     }
 
-    private fun uriToMultipart(imageUri: Uri?): MultipartBody.Part? {
-        if (imageUri == null) return null
+    // --- HELPER ACTUALIZADO PARA LISTAS ---
+    private fun urisToMultipart(uris: List<Uri>): List<MultipartBody.Part> {
+        val parts = mutableListOf<MultipartBody.Part>()
 
-        return try {
-            val type = context.contentResolver.getType(imageUri)
-            val stream: InputStream? = context.contentResolver.openInputStream(imageUri)
-            val bytes = stream?.readBytes()
-            stream?.close()
+        uris.forEach { uri ->
+            try {
+                val type = context.contentResolver.getType(uri) ?: "image/jpeg"
+                val stream: InputStream? = context.contentResolver.openInputStream(uri)
+                val bytes = stream?.readBytes()
+                stream?.close()
 
-            if (bytes != null && type != null) {
-                val requestFile = bytes.toRequestBody(type.toMediaTypeOrNull())
-                MultipartBody.Part.createFormData("image", "image.jpg", requestFile)
-            } else {
-                null
+                if (bytes != null) {
+                    val requestFile = bytes.toRequestBody(type.toMediaTypeOrNull())
+                    // "images" (plural) debe coincidir con Python
+                    val part = MultipartBody.Part.createFormData("images", "img_${System.currentTimeMillis()}.jpg", requestFile)
+                    parts.add(part)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
         }
+        return parts
     }
 }
