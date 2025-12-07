@@ -27,7 +27,7 @@ import mx.edu.utez.prototipojugueteria.ui.components.JugueteCard // Asegúrate d
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IndexJuguetesScreen(
-    // titulo: String = "Catálogo de Juguetes", // <-- 1. Eliminamos esto
+    // titulo: String = "Catálogo de Juguetes"
     juguetes: List<Juguete>,
     onAddClick: () -> Unit,
     onJugueteClick: (Int) -> Unit, // <-- 2. Cambiado a Int

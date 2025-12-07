@@ -20,7 +20,7 @@ import androidx.compose.runtime.remember
 @Composable
 fun RegistroScreen(viewModel: RegisterViewModel, navController: NavController) {
 
-    // ADAPTADOR TEMPORAL: Para usar tus componentes existentes sin modificarlos
+
     val tempLoginVM = remember {
         LoginViewModel().apply {
             username.value = viewModel.username.value

@@ -14,10 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,31 +38,38 @@ fun CreateJugueteScreen(
 ) {
     val context = LocalContext.current
 
-    // --- 1. Estado para la LISTA de URIs ---
+    // Estado para las fotos
     var selectedImageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
-
-    // Variable temporal para la cámara (guarda la foto actual antes de agregarla a la lista)
     var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
 
-    // --- 2. Launchers ---
+    // Estado para el mensaje de error (si se pasa de 3)
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    // Galería Múltiple
+    // --- Launchers ---
     val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickMultipleVisualMedia(),
+        contract = ActivityResultContracts.PickMultipleVisualMedia(3), // Intento de límite nativo (a veces no funciona en todos los Android)
         onResult = { uris ->
-            if (uris.isNotEmpty()) {
-                selectedImageUris = uris // Reemplaza o agrega según prefieras
+            if (uris.size > 3) {
+                errorMessage = "¡Solo puedes elegir máximo 3 fotos!"
+                // Cortamos la lista a 3
+                selectedImageUris = uris.take(3)
+            } else {
+                selectedImageUris = uris
+                errorMessage = null
             }
         }
     )
 
-    // Cámara (Toma una a la vez y la agrega a la lista)
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
             if (success && tempCameraUri != null) {
-                // Agregamos la foto nueva a la lista existente
-                selectedImageUris = selectedImageUris + tempCameraUri!!
+                if (selectedImageUris.size >= 3) {
+                    errorMessage = "¡Límite alcanzado! No puedes agregar más de 3 fotos."
+                } else {
+                    selectedImageUris = selectedImageUris + tempCameraUri!!
+                    errorMessage = null
+                }
             }
         }
     )
@@ -74,140 +78,99 @@ fun CreateJugueteScreen(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
             if (isGranted) {
-                val newUri = createImageUri(context)
-                tempCameraUri = newUri
-                cameraLauncher.launch(newUri)
+                if (selectedImageUris.size >= 3) {
+                    errorMessage = "¡Ya tienes 3 fotos! Elimina una para tomar otra."
+                } else {
+                    val newUri = createImageUri(context)
+                    tempCameraUri = newUri
+                    cameraLauncher.launch(newUri)
+                }
             }
         }
     )
 
-    // --- 3. Campos de texto ---
     var nombre by remember { mutableStateOf("") }
     var tipoJuguete by remember { mutableStateOf("") }
     var precio by remember { mutableStateOf("") }
 
-    // --- 4. Layout ---
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
+        modifier = Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Registrar Nuevo Juguete", style = MaterialTheme.typography.headlineMedium)
-
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- VISOR DE IMÁGENES (Carrusel) ---
+        // --- Visor de Fotos ---
         if (selectedImageUris.isNotEmpty()) {
             val pagerState = rememberPagerState(pageCount = { selectedImageUris.size })
-
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(250.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                modifier = Modifier.fillMaxWidth().height(250.dp).clip(RoundedCornerShape(12.dp))
             ) { page ->
                 AsyncImage(
                     model = selectedImageUris[page],
-                    contentDescription = "Foto seleccionada",
+                    contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
             }
-
-            // Indicador de cuántas fotos hay
-            Text(
-                text = "${pagerState.currentPage + 1} / ${selectedImageUris.size}",
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(top = 4.dp)
-            )
+            Text("${pagerState.currentPage + 1} / ${selectedImageUris.size}", style = MaterialTheme.typography.bodySmall)
         } else {
-            // Placeholder si no hay fotos
             AsyncImage(
-                model = null,
-                contentDescription = "Placeholder",
+                model = null, contentDescription = null,
                 placeholder = painterResource(id = R.drawable.loginutez),
                 error = painterResource(id = R.drawable.loginutez),
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .size(150.dp)
-                    .clip(CircleShape)
-                    .background(Color.LightGray)
+                modifier = Modifier.size(150.dp).clip(CircleShape).background(Color.LightGray)
             )
-            Text("Sin fotos seleccionadas", style = MaterialTheme.typography.bodySmall)
+            Text("Sin fotos", style = MaterialTheme.typography.bodySmall)
+        }
+
+        // --- MENSAJE DE ERROR ROJO ---
+        if (errorMessage != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = errorMessage!!,
+                color = Color.Red,
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botones de imagen
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Button(onClick = {
-                galleryLauncher.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                )
-            }) {
-                Text("Galería (Múltiple)")
+        // Botones
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            Button(onClick = { galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }) {
+                Text("Galería")
             }
-            Button(onClick = {
-                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-            }) {
-                Text("Cámara (+1)")
+            Button(onClick = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) }) {
+                Text("Cámara")
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+        TextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Nombre:") }, modifier = Modifier.fillMaxWidth())
+        Spacer(modifier = Modifier.height(8.dp))
+        TextField(value = tipoJuguete, onValueChange = { tipoJuguete = it }, label = { Text("Tipo:") }, modifier = Modifier.fillMaxWidth())
+        Spacer(modifier = Modifier.height(8.dp))
+        TextField(value = precio, onValueChange = { precio = it }, label = { Text("Precio:") }, modifier = Modifier.fillMaxWidth())
 
-        // Campos de texto
-        TextField(
-            value = nombre,
-            onValueChange = { nombre = it },
-            label = { Text("Nombre:") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        TextField(
-            value = tipoJuguete,
-            onValueChange = { tipoJuguete = it },
-            label = { Text("Tipo de Juguete:") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        TextField(
-            value = precio,
-            onValueChange = { precio = it },
-            label = { Text("Precio:") },
-            modifier = Modifier.fillMaxWidth()
-        )
         Spacer(modifier = Modifier.height(30.dp))
 
-        // Botón de Guardar
         Button(
             onClick = {
-                val precioDouble = precio.toDoubleOrNull() ?: 0.0
-
-                // Llamamos a la nueva función que acepta LISTA de URIs
-                viewModel.addNewJuguete(
-                    nombre = nombre,
-                    tipoJuguete = tipoJuguete,
-                    precio = precioDouble,
-                    imageUris = selectedImageUris // <-- Enviamos la lista
-                )
-
-                navController.popBackStack()
+                if (selectedImageUris.size > 3) {
+                    errorMessage = "¡Demasiadas fotos! Máximo 3."
+                } else {
+                    val precioDouble = precio.toDoubleOrNull() ?: 0.0
+                    viewModel.addNewJuguete(nombre, tipoJuguete, precioDouble, selectedImageUris)
+                    navController.popBackStack()
+                }
             },
             modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "Guardar Juguete")
-        }
+        ) { Text("Guardar Juguete") }
     }
 }
 
-// Función auxiliar para la cámara
 private fun createImageUri(context: Context): Uri {
     val imageDir = File(context.cacheDir, "images")
     imageDir.mkdirs()
