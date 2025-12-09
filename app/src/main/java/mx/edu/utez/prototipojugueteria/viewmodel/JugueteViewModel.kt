@@ -18,6 +18,10 @@ class JugueteViewModel(private val repository: JugueteRepository) : ViewModel() 
     private val _selectedJuguete = MutableStateFlow<Juguete?>(null)
     val selectedJuguete = _selectedJuguete.asStateFlow()
 
+    // --- NUEVO ESTADO: Alerta de datos desactualizados ---
+    private val _dataChangedAlert = MutableStateFlow(false)
+    val dataChangedAlert = _dataChangedAlert.asStateFlow()
+
     init {
         fetchJuguetes()
     }
@@ -28,45 +32,54 @@ class JugueteViewModel(private val repository: JugueteRepository) : ViewModel() 
         }
     }
 
-    // --- AHORA RECIBE LISTA ---
-    fun addNewJuguete(
-        nombre: String,
-        tipoJuguete: String?,
-        precio: Double,
-        imageUris: List<Uri> // Cambiado a List<Uri>
-    ) {
+    fun addNewJuguete(nombre: String, tipo: String?, precio: Double, imageUris: List<Uri>) {
         viewModelScope.launch {
             val currentUserId = UserSession.currentUserId
-            repository.insertJuguete(nombre, tipoJuguete, precio, imageUris, currentUserId)
+            repository.insertJuguete(nombre, tipo, precio, imageUris, currentUserId)
         }
     }
 
-    fun updateJuguete(
-        id: Int,
-        nombre: String,
-        tipoJuguete: String?,
-        precio: Double,
-        imageUris: List<Uri> // Cambiado a List<Uri>
-    ) {
+    fun updateJuguete(id: Int, nombre: String, tipo: String?, precio: Double, imageUris: List<Uri>) {
         viewModelScope.launch {
-            repository.updateJuguete(id, nombre, tipoJuguete, precio, imageUris)
+            repository.updateJuguete(id, nombre, tipo, precio, imageUris)
         }
     }
 
     fun deleteJuguete(id: Int) {
+        viewModelScope.launch { repository.deleteJuguete(id) }
+    }
+
+    // --- LÓGICA INTELIGENTE DE COMPRA ---
+    fun attemptPurchase(jugueteId: Int, precioVisto: Double, nombreVisto: String, tipoVisto: String) {
+        val compradorId = UserSession.currentUserId ?: return
+
         viewModelScope.launch {
-            repository.deleteJuguete(id)
+            // 1. Obtener la versión MÁS RECIENTE del servidor
+            val freshData = repository.getJugueteById(jugueteId)
+
+            if (freshData != null) {
+                // 2. Comprobar si hubo cambios críticos
+                val haCambiado = (freshData.precio != precioVisto) ||
+                        (freshData.nombre != nombreVisto) ||
+                        (freshData.tipoJuguete != tipoVisto) ||
+                        (freshData.vendido) // También falla si alguien más lo ganó antes
+
+                if (haCambiado) {
+                    // 3. Si cambió, activamos la alerta y actualizamos la vista
+                    _dataChangedAlert.value = true
+                    _selectedJuguete.value = freshData // Actualizamos lo que ve el usuario
+                } else {
+                    // 4. Si todo es igual, procedemos a comprar
+                    repository.comprarJuguete(jugueteId, compradorId)
+                    loadJuguete(jugueteId) // Refrescar para ver el "VENDIDO"
+                }
+            }
         }
     }
 
-    // --- NUEVO: COMPRAR ---
-    fun comprarJuguete(jugueteId: Int) {
-        val compradorId = UserSession.currentUserId ?: return
-        viewModelScope.launch {
-            repository.comprarJuguete(jugueteId, compradorId)
-            // Recargamos el juguete para ver que ya se vendió
-            loadJuguete(jugueteId)
-        }
+    // Función para cerrar la alerta
+    fun dismissDataChangedAlert() {
+        _dataChangedAlert.value = false
     }
 
     fun loadJuguete(id: Int) {
@@ -77,5 +90,6 @@ class JugueteViewModel(private val repository: JugueteRepository) : ViewModel() 
 
     fun clearSelectedJuguete() {
         _selectedJuguete.value = null
+        _dataChangedAlert.value = false // Limpiar alertas previas
     }
 }
