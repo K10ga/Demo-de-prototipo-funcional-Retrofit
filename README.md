@@ -1,5 +1,7 @@
 # Proyecto Juguetería ToyHub
 
+<img width="500" height="500" alt="toyhub" src="https://github.com/user-attachments/assets/3816e0cd-fc1d-4fd5-b396-faa895b6b01b" />
+
 ## Integrantes del Equipo
 
 * **Lee Medrano Kioga** (@K10ga)
