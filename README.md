@@ -2,11 +2,14 @@
 
 <img width="500" height="500" alt="toyhub" src="https://github.com/user-attachments/assets/3816e0cd-fc1d-4fd5-b396-faa895b6b01b" />
 
+
+**Cuatrimestre:** [4°D DSM]
+**Fecha de entrega:** 11 de Diciembre
 ## Integrantes del Equipo
 
-* **Lee Medrano Kioga** (@K10ga)
-* **Reyes García Uziel** (@UzielRey15)
-* **Soriano Cortés Carlos Daniel** (@DanielSoriano1807)
+* **Lee Medrano Kioga** | backend y frontend | (@K10ga)
+* **Reyes García Uziel** | frontend y tester | (@UzielRey15)
+* **Soriano Cortés Carlos Daniel** | backend y desarrollador de base de datos | (@DanielSoriano1807)
 
 ---
 
